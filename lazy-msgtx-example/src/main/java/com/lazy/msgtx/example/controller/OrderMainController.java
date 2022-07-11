@@ -1,15 +1,11 @@
 package com.lazy.msgtx.example.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.lazy.msgtx.core.redislock.RedisDLock;
 import com.lazy.msgtx.example.dto.OrderCreateDto;
 import com.lazy.msgtx.example.entity.OrderMain;
 import com.lazy.msgtx.example.service.OrderMainService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -27,6 +23,14 @@ public class OrderMainController {
     OrderMainService orderMainService;
 
 
+    @RedisDLock(resourceIdType = RedisDLock.ResourceIdType.METHOD_PARAM, paramIdx = 0)
+    @GetMapping("/redisLock")
+    public String redisLock(String lockId) {
+
+        return "ok";
+    }
+
+    @RedisDLock(resourceIdType = RedisDLock.ResourceIdType.OBJECT_FIELD, paramIdx = 0, resourceId = "getOrderNo")
     @PostMapping("/create")
     public String createOrder(@RequestBody OrderMain orderMain) {
 

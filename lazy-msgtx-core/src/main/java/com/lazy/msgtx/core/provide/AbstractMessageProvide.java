@@ -1,8 +1,5 @@
 package com.lazy.msgtx.core.provide;
 
-import com.lazy.msgtx.core.MessageTransactionContext;
-import com.lazy.msgtx.core.MessageTransactionManager;
-
 /**
  * <p>
  * 消息事务信息提供器
@@ -13,19 +10,6 @@ import com.lazy.msgtx.core.MessageTransactionManager;
  */
 public interface AbstractMessageProvide {
 
-    /**
-     * 设置消息类型
-     *
-     * @return
-     */
-    void setMessageType(String messageType);
-
-    /**
-     * 获取消息类型
-     *
-     * @return
-     */
-    String getMessageType();
 
     /**
      * 获取消息ID
@@ -50,13 +34,15 @@ public interface AbstractMessageProvide {
     String bizId();
 
     /**
-     * 获取栈帧
+     * 根消息保存之后，开始处理业务之前
      *
-     * @return
+     * @param
      */
-    default MessageTransactionContext.MessageStackFrame frame() {
-        MessageTransactionContext context = MessageTransactionManager.MESSAGE_TRANSACTION_CONTEXT.get();
-        return context.getInvokeStack().peek();
-    }
+    void beforeProcess();
+
+    /**
+     * 整个根业务处理成功之后
+     */
+    void afterProcess();
 
 }

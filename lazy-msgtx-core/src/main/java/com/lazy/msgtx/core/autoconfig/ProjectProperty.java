@@ -37,6 +37,14 @@ public class ProjectProperty {
      */
     private boolean autoCreateTable = false;
     /**
+     * 开启告警通知
+     */
+    private boolean enableWarnNotify = false;
+    /**
+     * 告警通知最大线程数
+     */
+    private Integer warnNotifyThreadCount = 5;
+    /**
      * 序列化方式
      */
     private SerializerType serializer = SerializerType.FASTJSON;

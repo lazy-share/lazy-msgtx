@@ -2,6 +2,7 @@ package com.lazy.msgtx.example.dto;
 
 import com.alibaba.fastjson.JSON;
 import com.lazy.msgtx.core.provide.MessageProvide;
+import com.lazy.msgtx.example.common.Cost;
 import com.lazy.msgtx.example.entity.OrderMain;
 import lombok.Data;
 
@@ -9,7 +10,7 @@ import java.math.BigDecimal;
 
 /**
  * <p>
- *
+ * 创建订单DTO
  * </p>
  *
  * @author lzy

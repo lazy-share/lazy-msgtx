@@ -13,7 +13,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class AutoCreateTableBean implements InitializingBean {
 
-    private MessageStorage messageStorage;
+    private final MessageStorage messageStorage;
 
     public AutoCreateTableBean(MessageStorage messageStorage) {
         this.messageStorage = messageStorage;

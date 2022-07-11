@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 
 /**
  * <p>
- *
+ *  订单服务
  * </p>
  *
  * @author lzy
@@ -34,6 +34,7 @@ public class OrderMainService {
     OrderDetailRepository orderDetailRepository;
 
 
+    //消息事务组-根
     @MessageTransaction(messageType = Cost.CREATE_ORDER)
     public void createOrder(OrderCreateDto createDto) {
 
@@ -41,23 +42,24 @@ public class OrderMainService {
         //获取AOP切面代理对象，对当前类方法的调用一定要使用AOP切面代理对象才行
         OrderMainService orderMainService = ((OrderMainService) AopContext.currentProxy());
 
-        //保持订单
+        //消息事务组-分支子调用-保持订单
         orderMainService.save(createDto);
 
-        //保存订单明细
+        //消息事务组-分支子调用-保存订单明细
         orderMainService.saveDetail(createDto);
 
-        //推送物流子系统
+        //消息事务组-分支子调用-推送物流子系统
         orderMainService.toLgst(createDto);
 
-        //推送积分子系统
+        //消息事务组-分支子调用-推送积分子系统
         orderMainService.toIngl(createDto);
 
-        //推送报表子系统
+        //消息事务组-分支子调用-推送报表子系统
         orderMainService.toReport(createDto);
 
     }
 
+    //消息事务组-分支子调用-保持订单
     @MessageTransaction(messageType = Cost.CREATE_ORDER_SAVE)
     public void save(OrderCreateDto createDto) {
 
@@ -69,6 +71,7 @@ public class OrderMainService {
         log.info("保存订单成功");
     }
 
+    //消息事务组-分支子调用-保存订单明细
     @MessageTransaction(messageType = Cost.CREATE_ORDER_SAVE_DETAIL)
     public void saveDetail(OrderCreateDto createDto) {
 
@@ -91,6 +94,7 @@ public class OrderMainService {
 
     }
 
+    //消息事务组-分支子调用-推送物流子系统
     @MessageTransaction(messageType = Cost.CREATE_ORDER_TO_LGST)
     public void toLgst(OrderCreateDto createDto) {
 
@@ -108,6 +112,7 @@ public class OrderMainService {
         log.info("推送物流单据：{}", JSON.toJSONString(lgstOrder));
     }
 
+    //消息事务组-分支子调用-推送积分子系统
     @MessageTransaction(messageType = Cost.CREATE_ORDER_TO_INGL)
     public void toIngl(OrderCreateDto createDto) {
 
@@ -116,6 +121,7 @@ public class OrderMainService {
         log.info("推送积分：" + createDto.getAddIntegral());
     }
 
+    //消息事务组-分支子调用-推送报表子系统
     @MessageTransaction(messageType = Cost.CREATE_ORDER_TO_REPORT)
     public void toReport(OrderCreateDto createDto) {
 

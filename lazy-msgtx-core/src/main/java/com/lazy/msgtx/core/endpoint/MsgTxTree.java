@@ -1,29 +1,32 @@
-package com.lazy.msgtx.core;
+package com.lazy.msgtx.core.endpoint;
+
 
 import lombok.Data;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.List;
 
 /**
- * 订单中心-消息日志表 实体
+ * <p>
+ *   递归树
+ * </p>
  *
- * @author lzy 2022-05-27 10:32:10
+ * @author lzy
+ * @since 2022/6/4.
  */
 @Data
-public class MessageLog {
-
+public class MsgTxTree implements Serializable, Comparable<MsgTxTree> {
 
     private String messageId;
-    private Long pid;
+    private String pid;
     private String bizId;
-    private Long id;
+    private String id;
     private String messageBody;
     private String processStatus;
     private Integer retryCount;
     private String messageType;
-    private boolean isNew = true;
-    private boolean isRetry = false;
     private String retryEndpoint;
     private Long createdBy;
     private String createdAccount;
@@ -31,7 +34,10 @@ public class MessageLog {
     private Long lastUpdatedBy;
     private String lastUpdatedAccount;
     private Date lastUpdateDate;
-    private Long objectVersionNumber;
+    private List<MsgTxTree> subList = new ArrayList<>();
 
-
+    @Override
+    public int compareTo(MsgTxTree o) {
+        return o.lastUpdateDate.compareTo(lastUpdateDate);
+    }
 }

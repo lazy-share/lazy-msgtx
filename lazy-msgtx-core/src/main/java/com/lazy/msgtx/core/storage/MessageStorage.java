@@ -1,7 +1,11 @@
 package com.lazy.msgtx.core.storage;
 
 import com.lazy.msgtx.core.MessageLog;
+import com.lazy.msgtx.core.endpoint.PageRequest;
+import com.lazy.msgtx.core.endpoint.PageResponse;
 import com.lazy.msgtx.core.provide.MessageProvide;
+
+import java.util.List;
 
 /**
  * <p>
@@ -33,6 +37,22 @@ public interface MessageStorage {
      * @return
      */
     MessageLog load(Long id);
+
+    /**
+     * 分页查询结果
+     *
+     * @param request
+     * @return
+     */
+    PageResponse page(PageRequest request);
+
+    /**
+     * 根据pid查询子级
+     *
+     * @param pids
+     * @return
+     */
+    List<MessageLog> loadInPid(List<Long> pids);
 
     /**
      * 查询

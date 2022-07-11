@@ -180,6 +180,7 @@ public class MessageTransactionContext {
                 messageLog.setBizId(provide.bizId());
                 messageLog.setProcessStatus(Const.N);
                 messageLog.setMessageBody(provide.messageBody());
+                messageLog.setRetryEndpoint(provide.getRetryEndpoint());
             }
         }
     }

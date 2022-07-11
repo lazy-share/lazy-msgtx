@@ -1,16 +1,13 @@
 package com.lazy.msgtx.core;
 
-import com.alibaba.fastjson.JSON;
 import com.lazy.msgtx.core.common.Const;
 import com.lazy.msgtx.core.provide.MessageProvide;
-import com.lazy.msgtx.core.serializer.Serialization;
 import com.lazy.msgtx.core.serializer.SerializationFactory;
 import com.lazy.msgtx.core.storage.MessageStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -36,6 +33,7 @@ public class MessageLogService {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+
     public Object doWork(ProceedingJoinPoint joinPoint, MessageProvide messageProvide) throws Throwable {
 
         Assert.notNull(messageProvide.messageId(), "messageId值不能为空");
@@ -58,7 +56,23 @@ public class MessageLogService {
         //数据库不存在，则新建一条，否则累计重试次数
         final MessageLog ofFinalMessageLog = this.saveOrUpdate(dbMessageLog);
 
-        return this.bindTransactionalExec(joinPoint, args, ofFinalMessageLog);
+        //回调钩子函数
+        this.beforeProcess(messageProvide);
+
+        //处理业务逻辑
+        if (MessageTransactionManager.MESSAGE_TRANSACTION_CONTEXT.get().isFirst()) {
+            return this.rootCall(joinPoint, args, ofFinalMessageLog);
+        }
+        return this.subCall(joinPoint, args, ofFinalMessageLog);
+    }
+
+    private void beforeProcess(MessageProvide messageProvide) {
+        try {
+            messageProvide.beforeProcess();
+        } catch (Exception e) {
+            log.error("messageType：{} messageId：{} 执行回调方法[ beforeProcess ]发生异常",
+                    messageProvide.getMessageType(), messageProvide.messageBody(), e);
+        }
     }
 
     public MessageLog saveOrUpdate(MessageLog messageLog) {
@@ -79,7 +93,7 @@ public class MessageLogService {
      * @param messageLog 消息日志
      * @return
      */
-    private Object bindTransactionalExec(ProceedingJoinPoint joinPoint, Object[] args, MessageLog messageLog) throws Throwable {
+    public Object subCall(ProceedingJoinPoint joinPoint, Object[] args, MessageLog messageLog) throws Throwable {
 
         //新开事务，使消息日志处理状态processStatus修改跟业务处理绑定起来
         DefaultTransactionDefinition defaultTransactionDefinition = new DefaultTransactionDefinition();
@@ -101,6 +115,14 @@ public class MessageLogService {
             transactionManager.rollback(status);
             throw ex;
         }
+    }
+
+    public Object rootCall(ProceedingJoinPoint joinPoint, Object[] args, MessageLog messageLog) throws Throwable {
+        //
+        this.successProcess(messageLog);
+        //把当前报文作为下一个执行方法的参数
+        BeanUtils.copyProperties(SerializationFactory.of().deserialize(messageLog.getMessageBody(), args[0].getClass()), args[0]);
+        return joinPoint.proceed(args);
     }
 
 
